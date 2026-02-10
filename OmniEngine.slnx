@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="OmniEngine/OmniEngine.vcxproj" Id="dab362e9-ec29-4347-b577-9525625dc8fd" />
+</Solution>
