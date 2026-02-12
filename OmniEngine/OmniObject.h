@@ -1,3 +1,6 @@
+#ifndef OMNIOBJECT_H
+#define OMNIOBJECT_H
+
 #include <glm/glm.hpp>
 #include <vector>
 
@@ -8,7 +11,7 @@ public:
 	glm::vec3 rotation;
 	OmniObject *parent;
 	std::vector<OmniObject*> children;
-	OmniObject(glm::vec3 _position = glm::vec3(0), glm::vec3 _scale = glm::vec3(0), glm::vec3 _rotation = glm::vec3(0)) : position(_position), scale(_scale), rotation(_rotation) {}
+	OmniObject(glm::vec3 _position = glm::vec3(0), glm::vec3 _scale = glm::vec3(0), glm::vec3 _rotation = glm::vec3(0)) : position(_position), scale(_scale), rotation(_rotation) { spawn(); }
 	virtual void update(float dt) {
 
 	}
@@ -31,10 +34,7 @@ public:
 		}
 	}
 protected:
-	void _update(float dt) {
-		update(dt);
-	}
-	void _spawn() {
-		spawn();
-	}
+	
 };
+
+#endif

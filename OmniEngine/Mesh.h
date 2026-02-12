@@ -1,5 +1,8 @@
+#ifndef MESH_H
+#define MESH_H
+
 #include <glm/glm.hpp>
-#include "Shader.cpp"
+#include "Shader.h"
 #include <string>
 #include <vector>
 using namespace std;
@@ -32,7 +35,7 @@ class Mesh {
         }
 
         // render the mesh
-        void Draw(Shader& shader)
+        void Draw(Shader &shader)
         {
             // bind appropriate textures
             unsigned int diffuseNr = 1;
@@ -100,3 +103,4 @@ class Mesh {
             glBindVertexArray(0);
         }
 };
+#endif

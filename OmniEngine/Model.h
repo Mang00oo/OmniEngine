@@ -1,86 +1,93 @@
+#ifndef MODEL_H
+#define MODEL_H
+
+#include "OmniObject.h"
 #include <glad/glad.h> 
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "stb_image.h"
-
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-#include "Mesh.cpp"
-#include "Shader.cpp"
+#include "stb_image.h"
+
+#include "Mesh.h"
+#include "Shader.h"
 
 #include <string>
 #include <map>
 #include <vector>
 using namespace std;
 
-unsigned int TextureFromFile(const char* path, const string& directory, bool gamma = false)
-{
-    string filename = string(path);
-    filename = directory + '/' + filename;
-
-    unsigned int textureID;
-    glGenTextures(1, &textureID);
-
-    int width, height, nrComponents;
-    // Use stb_image.h to load the image data
-    unsigned char* data = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);
-    if (data)
-    {
-        GLenum format;
-        if (nrComponents == 1)
-            format = GL_RED;
-        else if (nrComponents == 3)
-            format = GL_RGB;
-        else if (nrComponents == 4)
-            format = GL_RGBA;
-        // Handle gamma correction if required
-        GLenum internalFormat = format;
-        if (gamma && format == GL_RGB)
-            internalFormat = GL_SRGB; // Use sRGB for gamma correction on RGB textures
-
-        glBindTexture(GL_TEXTURE_2D, textureID);
-        // Load the texture data into VRAM
-        glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D); // Generate mipmaps
-
-        // Set texture wrapping and filtering options
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-        // Free the image memory after creating the OpenGL texture
-        //stbi_image_free(data);
-    }
-   else
-    {
-        cout << "Texture failed to load at path: " << filename << std::endl;
-        stbi_image_free(data); // Free even if data is null to be safe
-    }
-
-    return textureID;
-}
-class Model
-{
+class Model : public OmniObject {
     public:
-        Model(const char* path) // <-- Change from char* to const char*
+		Model(const char* path)
         {
             loadModel(path);
         }
-        void Draw(Shader& shader)
+        void Draw(Shader &shader)
         {
-            for (unsigned int i = 0; i < meshes.size(); i++)
+            cout << shader.ID;
+            for (unsigned int i = 0; i < meshes.size(); i++) {
+				glm::mat4 model = glm::mat4(1.0f);
+				model = glm::translate(model, position);
+				model = glm::rotate(model, glm::radians(rotation.x), glm::vec3(1, 0, 0));
+                model = glm::rotate(model, glm::radians(rotation.y), glm::vec3(0, 1, 0));
+                model = glm::rotate(model, glm::radians(rotation.z), glm::vec3(0, 0, 1));
+                shader.setMat4("model", model);
                 meshes[i].Draw(shader);
+            }
+        }
+        void spawn() override {
+
         }
     private:
         // model data
         vector<Mesh> meshes;
         string directory;
         vector<Texture> textures_loaded;
+
+        unsigned int TextureFromFile(const char* path, const string& directory, bool gamma = false)
+        {
+            string filename = string(path);
+            filename = directory + '/' + filename;
+
+            unsigned int textureID;
+            glGenTextures(1, &textureID);
+
+            int width, height, nrComponents;
+            unsigned char* data = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);
+            if (data)
+            {
+                GLenum format;
+                if (nrComponents == 1)
+                    format = GL_RED;
+                else if (nrComponents == 3)
+                    format = GL_RGB;
+                else if (nrComponents == 4)
+                    format = GL_RGBA;
+
+                glBindTexture(GL_TEXTURE_2D, textureID);
+                glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+                glGenerateMipmap(GL_TEXTURE_2D);
+
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+                stbi_image_free(data);
+            }
+            else
+            {
+                std::cout << "Texture failed to load at path: " << path << std::endl;
+                stbi_image_free(data);
+            }
+
+            return textureID;
+        }
 
         void loadModel(string path)
         {
@@ -195,3 +202,4 @@ class Model
             return textures;
         }
 };
+#endif

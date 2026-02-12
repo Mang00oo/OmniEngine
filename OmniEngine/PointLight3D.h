@@ -1,4 +1,6 @@
-#include "OmniObject.cpp"
+#ifndef POINTLIGHT3D_H
+#define POINTLIGHT3D_H
+#include "OmniObject.h"
 
 class Light : public OmniObject {
 	public:
@@ -16,3 +18,4 @@ class Light : public OmniObject {
 
 		}
 };
+#endif
